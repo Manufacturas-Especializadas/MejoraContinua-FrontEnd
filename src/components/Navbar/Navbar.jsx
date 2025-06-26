@@ -56,6 +56,7 @@ export const Navbar = () => {
                         <div className="md:hidden bg-white shadow-lg">
                             <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
                                 <a  
+                                    onClick={() => handleNavigate("/")}
                                     className="flex items-center px-3 py-2 
                                     rounded-md text-gray-600 hover:bg-gray-100 cursor-pointer"
                                 >
