@@ -43,8 +43,8 @@ const AdministratorChampion = () => {
 
                 const data = await response.json();
 
-                if(data && data.value){
-                    const idea = data.value;
+                if(data && data){
+                    const idea = data;
 
                     setFormData({
                         id: idea.id ?? "",

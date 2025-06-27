@@ -5,6 +5,7 @@ import Swal from "sweetalert2";
 
 const AdministratorFormEdit = () => {
     const[formData, setFormData] = useState({
+        id: "",
         fullName: "",
         workArea: "",
         currentSituation: "",
@@ -37,40 +38,38 @@ const AdministratorFormEdit = () => {
 
     useEffect(() => {
         const getIdeaById = async() => {
-            try{
-                const response = await fetch(`${config.apiUrl}/ContinuousImprovementForm/GetIdeaById?id=${id}`);
-
-                if(!response.ok){
-                    throw new Error("Error al obtener los datos");
-                }
-
-                const data = await response.json();
-
-                if(data && data.value){
-                    const idea = data.value;
-
-                    setFormData({
-                        id: idea.id ?? "",
-                        fullName: idea.fullName ?? "",
-                        workArea: idea.workArea ?? "",
-                        currentSituation: idea.currentSituation ?? "",
-                        ideaDescription: idea.ideaDescription ?? "",
-                        statusId: idea.statusId ?? "",
-                        registrationDate: idea.registrationDate?.split("T")[0] ?? "",
-                    });
-                }
-
-            }catch(error){
-                console.error("Error: ", error);
-                Swal.fire({
-                    icon: "error",
-                    title: "Ooops...",
-                    text: "No se pudo cargar el proyecto"
+            try {
+            const response = await fetch(`${config.apiUrl}/ContinuousImprovementForm/GetIdeaById?id=${id}`);
+            if (!response.ok) {
+                throw new Error("Error al obtener los datos");
+            }
+        
+            const data = await response.json();
+            console.log("Datos recibidos del backend:", data);
+        
+            if (data) {
+                setFormData({
+                    id: data.id ?? "",
+                    fullName: data.fullName ?? "",
+                    workArea: data.workArea ?? "",
+                    currentSituation: data.currentSituation ?? "",
+                    ideaDescription: data.ideaDescription ?? "",
+                    statusId: data.statusId ?? 1,
+                    registrationDate: data.registrationDate?.split("T")[0] ?? "",
                 });
             }
+        
+            } catch (error) {
+            console.error("Error: ", error);
+            Swal.fire({
+                icon: "error",
+                title: "Ooops...",
+                text: "No se pudo cargar el proyecto"
+            });
+            }
         };
-
-        if(id) getIdeaById();
+        
+        if (id) getIdeaById();
     }, [id]);
 
     const handleSubmit = async() => {
