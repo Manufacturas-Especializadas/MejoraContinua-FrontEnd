@@ -61,8 +61,17 @@ const MejoraForm = () => {
     const handleSubmit = async () => {
         if (!validateStep()) return;
 
-        setLoading(true);
         setError("");
+
+        const loadingAler = Swal.fire({
+            title: "Enviando...",
+            text: "Por favor espere mientras se envía",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            didOpen: () => {
+                Swal.showLoading();
+            }
+        });
 
         try {
             const response = await fetch(`${config.apiUrl}/ContinuousImprovementForm/Register`,  {
@@ -81,6 +90,8 @@ const MejoraForm = () => {
 
             const result = await response.json();
             
+            Swal.close();
+
             if (!response.ok) {
                 Swal.fire({
                     icon: "error",
@@ -173,8 +184,9 @@ const MejoraForm = () => {
                                     onClick={ handleSubmit }
                                     className="ml-auto px-4 py-2 bg-green-600 text-white 
                                     rounded-md hover:bg-green-700 transition hover:cursor-pointer"
+                                    disabled={ loading }
                                 >
-                                    {loading ? "Enviando..." : "Enviar"}
+                                    Enviar
                                 </button>
                             )
                         }
