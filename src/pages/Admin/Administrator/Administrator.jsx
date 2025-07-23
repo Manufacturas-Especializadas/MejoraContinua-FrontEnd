@@ -70,7 +70,7 @@ const Administrator = () => {
         <>
             <div className="container px-4 mx-auto">
                 <h1 className="text-3xl font-bold text-gray-600 text-center">
-                    Getión de ideas
+                    Gestión de ideas
                 </h1>
 
                 <p className="text-center text-gray-600">
