@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import config from "../../../../config";
 import IdeaTable from "../../../components/IdeaTable/IdeaTable";
+import Swal from "sweetalert2";
 
 const Administrator = () => {
     const[ideaList, setIdeaList] = useState([]);
+    const [download, setDownload] = useState(false);
 
     useEffect(() => {
         const getIdeaList = async () => {
@@ -35,6 +37,17 @@ const Administrator = () => {
 
     const handleExport = async() => {
         try{
+            setDownload(true);
+
+            Swal.fire({
+                title: "Generando reporte",
+                html: "Por favor espere mientras se prepara tu archivo...",
+                allowOutsideClick: false,
+                didOpen: () => {
+                    Swal.showLoading();
+                }
+            });
+
             const ulr = `${config.apiUrl}/ContinuousImprovementForm/DownloadExcel`;
 
             const response = await fetch(ulr, {
@@ -61,9 +74,21 @@ const Administrator = () => {
             document.body.appendChild(link);
             link.click();
             link.remove();
+
+            Swal.close();
+
+            Swal.fire({
+                icon: "success",
+                title: "Descarga completa",
+                text: "El archivo se ha descargado correctamente",
+                timer: 2000,
+                showConfirmButton: false
+            });
         }catch(error){
             console.error("Error al exportar: ", error);
-        }
+        }finally{
+            setDownload(false);
+        }        
     }
 
     return (
