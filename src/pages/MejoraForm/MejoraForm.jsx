@@ -62,8 +62,9 @@ const MejoraForm = () => {
         if (!validateStep()) return;
 
         setError("");
+        setLoading(true);
 
-        const loadingAler = Swal.fire({
+        const loadingAlert = Swal.fire({
             title: "Enviando...",
             text: "Por favor espere mientras se envía",
             allowOutsideClick: false,
@@ -74,35 +75,42 @@ const MejoraForm = () => {
         });
 
         try {
-            const response = await fetch(`${config.apiUrl}/ContinuousImprovementForm/Register`,  {
+            const requestData = {
+                fullName: formData.nombre.filter(n => n.trim() !== "").join(", "),
+                workArea: formData.area,
+                currentSituation: formData.descripcionProblema,
+                ideaDescription: formData.ideaMejora,
+                categoryIds: formData.categoryIds || [],
+                statusId: 1,
+                names: formData.nombre.filter(n => n.trim() !== ""),
+                registrationDate: new Date().toISOString()
+            };
+
+            const response = await fetch(`${config.apiUrl}/ContinuousImprovementForm/Register`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({
-                    fullName: formData.nombre.filter(n => n.trim() !== "").join(", "),
-                    workArea: formData.area,
-                    currentSituation: formData.descripcionProblema,
-                    ideaDescription: formData.ideaMejora,
-                    categoryIds: formData.categoryIds || []
-                }),
+                body: JSON.stringify(requestData),
             });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    throw new Error(errorJson.message || "Error al enviar la idea");
+                } catch {
+                    throw new Error(errorText || "Error al enviar la idea");
+                }
+            }
 
             const result = await response.json();
             
             Swal.close();
 
-            if (!response.ok) {
-                Swal.fire({
-                    icon: "error",
-                    title: "Oops...",
-                    text: result.message || "Error al enviar la idea"
-                });
-                return;
-            }
-
             Swal.fire({
                 title: "¡Gracias por tu idea!",
+                text: result.message,
                 icon: "success",
             });
 
@@ -117,10 +125,10 @@ const MejoraForm = () => {
         } catch (error) {
             Swal.fire({
                 icon: "error",
-                title: "Error de conexión",
-                text: "No se pudo conectar con el servidor"
+                title: "Error",
+                text: error.message || "No se pudo conectar con el servidor"
             });
-            console.error(error);
+            console.error("Error al enviar:", error);
         } finally {
             setLoading(false);
         }
