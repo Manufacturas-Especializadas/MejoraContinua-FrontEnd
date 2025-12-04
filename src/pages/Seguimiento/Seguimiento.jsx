@@ -39,8 +39,20 @@ const Seguimiento = () => {
         idea.fullName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const ideas2026 = filteredIdeas.filter(idea => idea.year === 2026);
-    const ideas2025 = filteredIdeas.filter(idea => idea.year === 2025);
+    const getIdeasByYear = (year) => {
+        const yearIdeas = filteredIdeas.filter(idea => idea.year === year);
+
+        if (year === 2025) {
+            return yearIdeas.filter(idea => idea.status === "En proceso");
+        } else if (year === 2026) {
+            return yearIdeas;
+        }
+
+        return yearIdeas;
+    };
+
+    const ideas2026 = getIdeasByYear(2026);
+    const ideas2025 = getIdeasByYear(2025);
 
     const currentYearIdeas = activeTab === "2026" ? ideas2026 : ideas2025;
 
@@ -69,12 +81,27 @@ const Seguimiento = () => {
     const IdeasSection = () => {
         return (
             <div className="mt-6">
+                {activeTab === "2025" && (
+                    <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                        <div className="flex items-center">
+                            <svg className="h-5 w-5 text-blue-500 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <span className="text-sm text-blue-700">
+                                Mostrando solo ideas con estatus <span className="font-semibold">"En proceso"</span>
+                            </span>
+                        </div>
+                    </div>
+                )}
+
                 {paginatedIdeas.length === 0 ? (
                     <div className="text-center py-12">
                         <p className="text-gray-500 text-lg">
                             {searchTerm
                                 ? `No se encontraron ideas que coincidan con "${searchTerm}" en ${activeTab}`
-                                : `No hay ideas registradas en ${activeTab}`}
+                                : activeTab === "2025"
+                                    ? `No hay ideas con estatus "En proceso" en ${activeTab}`
+                                    : `No hay ideas registradas en ${activeTab}`}
                         </p>
                     </div>
                 ) : (
@@ -97,7 +124,7 @@ const Seguimiento = () => {
                             <button
                                 onClick={goToPrevious}
                                 disabled={currentPage === 1}
-                                className={`px-4 py-2 rounded-md transition-colors hover:cursor-pointer ${currentPage === 1
+                                className={`px-4 py-2 rounded-md transition-colors ${currentPage === 1
                                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                     : "bg-indigo-600 hover:bg-indigo-700 text-white"
                                     }`}
@@ -136,7 +163,7 @@ const Seguimiento = () => {
                             <button
                                 onClick={goToNext}
                                 disabled={currentPage === totalPages}
-                                className={`px-4 py-2 rounded-md transition-colors hover:cursor-pointer ${currentPage === totalPages
+                                className={`px-4 py-2 rounded-md transition-colors ${currentPage === totalPages
                                     ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                     : "bg-indigo-600 hover:bg-indigo-700 text-white"
                                     }`}
@@ -183,7 +210,7 @@ const Seguimiento = () => {
                     <nav className="flex justify-center space-x-8" aria-label="Tabs">
                         <button
                             onClick={() => setActiveTab("2026")}
-                            className={`py-4 px-1 border-b-2 font-medium text-lg ${activeTab === "2026"
+                            className={`py-4 px-1 border-b-2 font-medium text-lg flex items-center ${activeTab === "2026"
                                 ? "border-indigo-600 text-indigo-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
@@ -199,7 +226,7 @@ const Seguimiento = () => {
 
                         <button
                             onClick={() => setActiveTab("2025")}
-                            className={`py-4 px-1 border-b-2 font-medium text-lg ${activeTab === "2025"
+                            className={`py-4 px-1 border-b-2 font-medium text-lg flex items-center ${activeTab === "2025"
                                 ? "border-indigo-600 text-indigo-600"
                                 : "border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300"
                                 }`}
@@ -210,6 +237,9 @@ const Seguimiento = () => {
                                 : "bg-gray-100 text-gray-800"
                                 }`}>
                                 {ideas2025.length}
+                            </span>
+                            <span className="ml-2 text-xs text-blue-600 font-medium">
+                                (Solo en proceso)
                             </span>
                         </button>
                     </nav>
@@ -240,7 +270,7 @@ const Seguimiento = () => {
                         </div>
                         <button
                             onClick={() => setSearchTerm("")}
-                            className="text-sm text-blue-600 hover:text-blue-800 font-medium hover:cursor-pointer"
+                            className="text-sm text-blue-600 hover:text-blue-800 font-medium"
                         >
                             Limpiar filtro
                         </button>
