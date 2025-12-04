@@ -42,11 +42,11 @@ const Seguimiento = () => {
     const getIdeasByYear = (year) => {
         const yearIdeas = filteredIdeas.filter(idea => idea.year === year);
 
-        if (year === 2025) {
-            return yearIdeas.filter(idea => idea.status === "En proceso");
-        } else if (year === 2026) {
-            return yearIdeas;
-        }
+        // if (year === 2025) {
+        //     return yearIdeas.filter(idea => idea.status === "En proceso");
+        // } else if (year === 2026) {
+        //     return yearIdeas;
+        // }
 
         return yearIdeas;
     };
