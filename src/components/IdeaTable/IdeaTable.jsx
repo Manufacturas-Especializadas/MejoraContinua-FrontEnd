@@ -166,38 +166,6 @@ const IdeaTable = ({ data = [], searchTerm = "", onSearchChange }) => {
                     responsive
                     striped
                     subHeader
-                    subHeaderComponent={
-                        <div className="flex justify-between items-center w-full">
-                            <input
-                                type="text"
-                                placeholder="Buscar por nombre..."
-                                className="border rounded p-2 text-sm w-64"
-                                value={filteredText}
-                                onChange={(e) => {
-                                    setFilteredText(e.target.value);
-                                    if (onSearchChange) {
-                                        onSearchChange(e.target.value);
-                                    }
-                                }}
-                            />
-                            {
-                                filteredText && (
-                                    <button
-                                        onClick={() => {
-                                            setResetPaginationToggle(!resetPaginationToggle);
-                                            setFilteredText("");
-                                            if (onSearchChange) {
-                                                onSearchChange("");
-                                            }
-                                        }}
-                                        className="text-sm text-red-500 hover:text-red-700 underline"
-                                    >
-                                        Limpiar
-                                    </button>
-                                )
-                            }
-                        </div>
-                    }
                     subHeaderAlign="right"
                     customStyles={customStyles}
                     progressComponent={
