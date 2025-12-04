@@ -42,12 +42,6 @@ const Seguimiento = () => {
     const getIdeasByYear = (year) => {
         const yearIdeas = filteredIdeas.filter(idea => idea.year === year);
 
-        // if (year === 2025) {
-        //     return yearIdeas.filter(idea => idea.status === "En proceso");
-        // } else if (year === 2026) {
-        //     return yearIdeas;
-        // }
-
         return yearIdeas;
     };
 
@@ -237,9 +231,6 @@ const Seguimiento = () => {
                                 : "bg-gray-100 text-gray-800"
                                 }`}>
                                 {ideas2025.length}
-                            </span>
-                            <span className="ml-2 text-xs text-blue-600 font-medium">
-                                (Solo en proceso)
                             </span>
                         </button>
                     </nav>
