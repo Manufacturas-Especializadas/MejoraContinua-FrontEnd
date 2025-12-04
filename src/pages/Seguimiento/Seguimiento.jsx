@@ -232,9 +232,6 @@ const Seguimiento = () => {
                                 }`}>
                                 {ideas2025.length}
                             </span>
-                            <span className="ml-2 text-xs text-blue-600 font-medium">
-                                (Solo en proceso)
-                            </span>
                         </button>
                     </nav>
                 </div>
