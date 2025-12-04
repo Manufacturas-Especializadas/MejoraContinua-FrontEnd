@@ -20,7 +20,7 @@ const Paso1Datos = ({ formData, setFormData, handleChange }) => {
         <>
             <div className="space-y-4 animate-fadeIn">
                 <div>
-                    <label className="block text-sm font-medium text-gray-700">Nombre(s) completo(s)</label>
+                    <label className="block text-sm font-medium text-gray-700">Nombre(s)</label>
 
                     {formData.nombre.map((nombre, index) => (
                         <div key={index} className="flex items-center space-x-2 mt-2">
