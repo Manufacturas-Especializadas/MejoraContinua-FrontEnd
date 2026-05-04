@@ -1,56 +1,59 @@
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { HiOutlineLightBulb, HiOutlineSearchCircle } from "react-icons/hi";
 
-const OpcionesIncio = () => {
-    const navigate = useNavigate();
+export const OpcionesIncio = () => {
+  const navigate = useNavigate();
 
-    const handleNavigate = (path) => {
-        navigate(path);
-    };
+  const options = [
+    {
+      title: "Registra tu idea",
+      description:
+        "Completa el formulario para registrar tu idea de mejora continua.",
+      path: "registroIdea",
+      icon: <HiOutlineLightBulb className="w-8 h-8" />,
+      color: "indigo",
+    },
+    {
+      title: "Seguimiento",
+      description: "Consulta el estado de tus ideas registradas anteriormente.",
+      path: "seguimiento",
+      icon: <HiOutlineSearchCircle className="w-8 h-8" />,
+      color: "blue",
+    },
+  ];
 
-    return (
-        <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <button
-                    onClick={() => handleNavigate("/registroIdea") }
-                    className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg
-                    border border-indigo-100 text-left transform transition duration-300
-                    hover:-translate-y-1 focus:outline-none focus:right-2 focus:ring-indigo-500 hover:cursor-pointer"
-                >
-                    <div className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 mb-4 bg-indigo-100 rounded-full
-                            flex items-center justify-center">
-                            <span className="text-indigo-600 text-2xl font-bold">📝</span>
-                        </div>
-
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">
-                            Registra tu idea
-                        </h3>
-
-                        <p className="text-sm text-gray-600">
-                            Completa el formulario para registrar tu idea de mejora continua.
-                        </p>
-                    </div>
-                </button>
-
-                <button
-                    onClick={ () => handleNavigate("/seguimiento") }
-                    className="bg-white p-6 rounded-xl shadow-md hover:shadow-lg 
-                    border border-blue-100 text-left transform transition duration-300 
-                    hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-blue-500 hover:cursor-pointer"
-                >
-                    <div className="flex flex-col items-center text-center">
-                        <div className="w-16 h-16 mb-4 bg-blue-100 rounded-full flex items-center justify-center">
-                            <span className="text-blue-600 text-2xl font-bold">🔍</span>
-                        </div>
-                        <h3 className="text-lg font-semibold text-gray-800 mb-2">Seguimiento</h3>
-                        <p className="text-sm text-gray-600">
-                            Consulta el estado de tus ideas registradas anteriormente.
-                        </p>
-                    </div>
-                </button>
+  return (
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      {options.map((opt) => (
+        <Link
+          key={opt.path}
+          to={opt.path}
+          className="group relative bg-white p-8 rounded-2xl shadow-sm border 
+          border-slate-200 text-left transition-all duration-300 hover:shadow-xl
+          hover:border-indigo-300 hover:-translate-y-1 focus:outline-none focus:right-2
+          focus:ring-indigo-500/50"
+        >
+          <div className="flex flex-col items-center text-center">
+            <div
+              className={`mb-5 rounded-xl bg-${opt.color}-50 text-${opt.color}-600
+                group-hover:scale-110 transition-transform duration-300
+              `}
+            >
+              {opt.icon}
             </div>
-        </>
-    )
-}
-
-export default OpcionesIncio
+            <h3 className="text-xl font-bold text-slate-800 mb-3">
+              {opt.title}
+            </h3>
+            <p className="text-slate-500 leading-relaxed">{opt.description}</p>
+            <div
+              className="mt-6 flex items-center text-sm font-semibold text-indigo-600 
+              group-hover:opacity-100 transition-opacity"
+            >
+              Comenzar ahora →
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+};
