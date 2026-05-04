@@ -1,6 +1,6 @@
-import { Outlet, useLocation } from "react-router-dom";
+import { BrowserRouter, Outlet, useLocation } from "react-router-dom";
 import { Navbar } from "../components/Navbar/Navbar";
-import OpcionesIncio from "../components/OpcionesIncio/OpcionesIncio";
+import { OpcionesIncio } from "../components/OpcionesIncio/OpcionesIncio";
 
 const Layout = () => {
   const location = useLocation();
@@ -8,27 +8,33 @@ const Layout = () => {
   const showHeader = location.pathname === "/";
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50/50">
       <Navbar />
-
-      <div className="max-w-2xl mx-auto px-4">
+      <div className="max-w-5xl mx-auto px-4 pt-10">
         {showHeader && (
-          <header className="mb-8 text-center pt-5">
-            <h1 className="text-3xl font-bold text-gray-800">
-              Plataforma de Mejora Continua
-            </h1>
-            <p className="mt-2 text-sm text-gray-600">
-              Registra tus ideas o consulta su estado.
-            </p>
-          </header>
+          <>
+            <header className="mb-12 text-center">
+              <h1
+                className="text-4xl font-extrabold tracking-tight 
+                text-slate-900 sm:text-5xl"
+              >
+                Plataforma de{" "}
+                <span className="text-indigo-600">Mejora Continua</span>
+              </h1>
+              <p className="mt-4 text-lg text-slate-600 max-w-2xl mx-auto">
+                Transforma tus ideas en soluciones. Registrar nuevas propuestas
+                o gestiona el avance de tus proyectos actuales
+              </p>
+            </header>
+            <OpcionesIncio />
+          </>
         )}
-
-        {location.pathname === "/" && <OpcionesIncio />}
       </div>
-      <main className="mt-5 mx-auto px-4">
+
+      <main className={`${showHeader ? "mt-16" : "mt-6"}`}>
         <Outlet />
       </main>
-    </>
+    </div>
   );
 };
 
