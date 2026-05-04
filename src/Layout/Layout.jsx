@@ -11,7 +11,6 @@ const Layout = () => {
     <>
       <Navbar />
 
-      {/* Contenido principal */}
       <div className="max-w-2xl mx-auto px-4">
         {showHeader && (
           <header className="mb-8 text-center pt-5">
@@ -26,7 +25,6 @@ const Layout = () => {
 
         {location.pathname === "/" && <OpcionesIncio />}
       </div>
-      {/* Rutas dinámicas */}
       <main className="mt-5 mx-auto px-4">
         <Outlet />
       </main>
