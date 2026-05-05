@@ -13,15 +13,21 @@ const App = () => {
         <Routes>
           <Route path="/" element={<Layout />}>
             <Route path="registroIdea" element={<MejoraForm />} />
-            <Route path="seguimiento" element={<Seguimiento/>}/>
-            <Route path="administrador" element={<Administrator/>}/>
-            <Route path="administrador/editar/:id" element={<AdministratorFormEdit/>}/>
-            <Route path="administrador/asignarChampion/:id" element={<AdministratorChampion/>}/>
+            <Route path="seguimiento" element={<Seguimiento />} />
+            <Route path="administrador" element={<Administrator />} />
+            <Route
+              path="administrador/editar/:id"
+              element={<AdministratorFormEdit />}
+            />
+            <Route
+              path="administrador/asignarChampion/:id"
+              element={<AdministratorChampion />}
+            />
           </Route>
         </Routes>
       </Router>
     </>
-  )
-}
+  );
+};
 
-export default App
+export default App;

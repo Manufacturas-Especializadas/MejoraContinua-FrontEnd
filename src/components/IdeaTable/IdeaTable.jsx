@@ -1,189 +1,295 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import DataTable from "react-data-table-component";
 import IdeaModalDetails from "../IdeaModalDetails/IdeaModalDetails";
+import {
+  HiOutlinePencilAlt,
+  HiOutlineEye,
+  HiOutlineUserAdd,
+  HiChevronLeft,
+  HiChevronRight,
+  HiOutlineTrash,
+} from "react-icons/hi";
+import { useDeleteIdea } from "../../hooks/useDeleteIdea";
+import { DeleteConfirmationModal } from "../DeleteConfirmationModal/DeleteConfirmationModal";
 
-const IdeaTable = ({ data = [], searchTerm = "", onSearchChange }) => {
-    const [filteredText, setFilteredText] = useState("");
-    const [resetPaginationToggle, setResetPaginationToggle] = useState("");
-    const [loading, setLoading] = useState(true);
-    const [modalOpen, setModalOpen] = useState(false);
-    const [selectedIdea, setSelectedIdea] = useState(null);
-    const navigate = useNavigate();
+const IdeaTable = ({ data = [], searchTerm = "", onRefresh }) => {
+  const [filteredText, setFilteredText] = useState("");
+  const [modalOpen, setModalOpen] = useState(false);
+  const [selectedIdea, setSelectedIdea] = useState(null);
 
-    useEffect(() => {
-        setFilteredText(searchTerm);
-    }, [searchTerm]);
+  const [currentPage, setCurrentPage] = useState(1);
 
-    useEffect(() => {
-        if (data) {
-            setLoading(false);
-        }
-    }, [data]);
+  const { deleteIdea, isDeleting } = useDeleteIdea();
+  const [deleteModal, setDeleteModal] = useState({ open: false, idea: null });
 
-    const handleNavigate = (path) => {
-        navigate(path);
+  const itemsPerPage = 10;
+
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setFilteredText(searchTerm);
+    setCurrentPage(1);
+  }, [searchTerm]);
+
+  const openModal = (idea) => {
+    setSelectedIdea(idea);
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setSelectedIdea(null);
+  };
+
+  const handleDelete = async () => {
+    const result = await deleteIdea(deleteModal.idea.id);
+
+    if (result.success) {
+      setDeleteModal({ open: false, idea: null });
+      if (onRefresh) onRefresh();
+    }
+  };
+
+  const filteredItems = useMemo(() => {
+    const searchText = filteredText.toLowerCase();
+    return data.filter(
+      (item) =>
+        item.fullName?.toLowerCase().includes(searchText) ||
+        Object.values(item).some((val) =>
+          val?.toString().toLowerCase().includes(searchText),
+        ),
+    );
+  }, [data, filteredText]);
+
+  const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredItems.slice(indexOfFirstItem, indexOfLastItem);
+
+  const getStatusStyle = (status) => {
+    const styles = {
+      Enviada: "bg-blue-50 text-blue-700 border-blue-100",
+      "En proceso": "bg-amber-50 text-amber-700 border-amber-100",
+      "No aprobada": "bg-red-50 text-red-700 border-red-100",
+      Implementada: "bg-emerald-50 text-emerald-700 border-emerald-100",
     };
+    return styles[status] || "bg-gray-50 text-gray-700 border-gray-100";
+  };
 
-    const openModal = (idea) => {
-        setSelectedIdea(idea);
-        setModalOpen(true);
-    };
-
-    const closeModal = () => {
-        setModalOpen(false);
-        setSelectedIdea(null);
-    };
-
-    const filteredItems = useMemo(() => {
-        if (!data || data.length === 0) return [];
-
-        const searchText = filteredText.toLowerCase();
-
-        return data.filter(item => {
-            const nameMatch = item.fullName &&
-                item.fullName.toLowerCase().includes(searchText);
-
-            const generalMatch = Object.values(item).some(val => {
-                return (
-                    val !== null &&
-                    val !== undefined &&
-                    typeof val.toString === "function" &&
-                    val.toString().toLowerCase().includes(searchText)
-                );
-            });
-
-            return nameMatch || generalMatch;
-        })
-    }, [data, filteredText]);
-
-    const columns = [
-        {
-            name: "Nombre",
-            selector: row => row.fullName || "Sin nombre",
-            sortable: true,
-        },
-        {
-            name: "Área de trabajo",
-            selector: row => row.workArea,
-            sortable: true,
-            grow: 1
-        },
-        {
-            name: "Fecha de regisgtro",
-            selector: row => new Date(row.registrationDate).toLocaleDateString(),
-            sortable: true,
-            grow: 1
-        },
-        {
-            name: "Estado",
-            selector: row => row.status,
-            sortable: true,
-            grow: 1
-        },
-        {
-            name: "Acciones",
-            cell: row => (
-                <div className="flex space-x-2 justify-center">
+  return (
+    <>
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="border-b border-slate-200 bg-slate-50/50">
+              <th
+                className="px-6 py-4 text-xs font-bold text-slate-500 uppercase 
+								tracking-wider"
+              >
+                Nombre
+              </th>
+              <th
+                className="px-6 py-4 text-xs font-bold text-slate-500 uppercase 
+								tracking-wider"
+              >
+                Área
+              </th>
+              <th
+                className="px-6 py-4 text-xs font-bold text-slate-500 uppercase 
+								tracking-wider"
+              >
+                Fecha
+              </th>
+              <th
+                className="px-6 py-4 text-xs font-bold text-slate-500 uppercase 
+								tracking-wider"
+              >
+                Estado
+              </th>
+              <th
+                className="px-6 py-4 text-xs font-bold text-slate-500 uppercase 
+								tracking-wider text-center"
+              >
+                Acciones
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-100 bg-white">
+            {currentItems.map((row) => (
+              <tr
+                key={row.id}
+                className="hover:bg-slate-50/80 transition-colors group"
+              >
+                <td className="px-6 py-4">
+                  <div className="font-semibold text-slate-900">
+                    {row.fullName || "Sin nombre"}
+                  </div>
+                </td>
+                <td className="px-6 py-4 text-slate-600 text-sm">
+                  {row.workArea}
+                </td>
+                <td className="px-6 py-4 text-slate-500 text-sm">
+                  {new Date(row.registrationDate).toLocaleDateString("es-MX", {
+                    day: "2-digit",
+                    month: "short",
+                    year: "numeric",
+                  })}
+                </td>
+                <td className="px-6 py-4">
+                  <span
+                    className={`px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyle(row.status)}`}
+                  >
+                    {row.status}
+                  </span>
+                </td>
+                <td className="px-6 py-4">
+                  <div className="flex justify-center gap-1">
                     <button
-                        onClick={() => handleNavigate(`/administrador/editar/${row.id}`)}
-                        className="text-sky-600 hover:text-sky-900 
-                        hover:cursor-pointer font-medium"
+                      title="Editar Idea"
+                      onClick={() =>
+                        navigate(`/administrador/editar/${row.id}`)
+                      }
+                      className="p-2 text-slate-400 hover:text-indigo-600 
+											hover:bg-indigo-50 rounded-lg transition-all"
                     >
-                        Editar
+                      <HiOutlinePencilAlt className="w-5 h-5" />
                     </button>
                     <button
-                        onClick={() => openModal(row)}
-                        className="text-blue-600 hover:text-blue-900
-                        hover:cursor-pointer font-medium"
+                      title="Ver Detalles"
+                      onClick={() => openModal(row)}
+                      className="p-2 text-slate-400 hover:text-blue-600 
+											hover:bg-blue-50 rounded-lg transition-all"
                     >
-                        Detalles
+                      <HiOutlineEye className="w-5 h-5" />
                     </button>
                     <button
-                        onClick={() => handleNavigate(`/administrador/asignarChampion/${row.id}`)}
-                        className="text-violet-600 hover:text-violet-900
-                        hover:cursor-pointer font-medium"
+                      title="Asignar Champion"
+                      onClick={() =>
+                        navigate(`/administrador/asignarChampion/${row.id}`)
+                      }
+                      className="p-2 text-slate-400 hover:text-violet-600 
+											hover:bg-violet-50 rounded-lg transition-all"
                     >
-                        Asignar Champion
+                      <HiOutlineUserAdd className="w-5 h-5" />
                     </button>
-                </div>
-            ),
-            ignoreRowClick: true,
-        }
-    ];
+                    <button
+                      title="Eliminar Idea"
+                      onClick={() => setDeleteModal({ open: true, idea: row })}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 
+											rounded-lg transition-all"
+                    >
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
-    const customStyles = {
-        headCells: {
-            style: {
-                backgroundColor: '#0071ab',
-                color: 'white',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                padding: '12px',
-                textAlign: 'center'
-            },
-        },
-        cells: {
-            style: {
-                textAlign: 'center',
-                padding: '12px'
-            }
-        },
-        rows: {
-            style: {
-                minHeight: '50px',
-                '&:nth-child(even)': {
-                    backgroundColor: 'rgba(0, 164, 228, 0.05)'
-                },
-                '&:hover': {
-                    backgroundColor: 'rgba(0, 142, 212, 0.1)'
+        {filteredItems.length === 0 && (
+          <div className="py-20 text-center">
+            <p className="text-slate-400 font-medium">
+              No se encontraron registros.
+            </p>
+          </div>
+        )}
+      </div>
+
+      {filteredItems.length > 0 && (
+        <div
+          className="px-6 py-4 bg-slate-50/50 border-t border-slate-200 
+					flex flex-col sm:flex-row justify-between items-center gap-4"
+        >
+          <div className="text-sm text-slate-500">
+            Mostrando{" "}
+            <span className="font-semibold text-slate-700">
+              {indexOfFirstItem + 1}
+            </span>{" "}
+            a{" "}
+            <span className="font-semibold text-slate-700">
+              {Math.min(indexOfLastItem, filteredItems.length)}
+            </span>{" "}
+            de{" "}
+            <span className="font-semibold text-slate-700">
+              {filteredItems.length}
+            </span>{" "}
+            ideas
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1}
+              className="p-2 rounded-lg border border-slate-200 bg-white 
+							text-slate-600 hover:bg-slate-50 disabled:opacity-50 
+							disabled:cursor-not-allowed transition-all"
+            >
+              <HiChevronLeft className="w-5 h-5" />
+            </button>
+
+            <div className="flex gap-1">
+              {[...Array(totalPages)].map((_, i) => {
+                const pageNum = i + 1;
+                if (
+                  totalPages > 5 &&
+                  Math.abs(pageNum - currentPage) > 1 &&
+                  pageNum !== 1 &&
+                  pageNum !== totalPages
+                ) {
+                  if (pageNum === 2 || pageNum === totalPages - 1)
+                    return (
+                      <span key={pageNum} className="px-2 text-slate-400">
+                        ...
+                      </span>
+                    );
+                  return null;
                 }
-            },
-        },
-        pagination: {
-            style: {
-                borderTop: "none",
-                justifyContent: "center"
-            }
-        }
-    };
 
-    return (
-        <>
-            <div className="w-full">
-                <DataTable
-                    columns={columns}
-                    data={filteredItems}
-                    pagination
-                    paginationPerPage={10}
-                    paginationRowsPerPageOptions={[5, 10, 15]}
-                    paginationComponentOptions={{
-                        rowsPerPageText: "Filas por página:",
-                        rangeSeparatorText: "de",
-                        noRowsPerPage: false,
-                    }}
-                    highlightOnHover
-                    responsive
-                    striped
-                    subHeader
-                    subHeaderAlign="right"
-                    customStyles={customStyles}
-                    progressComponent={
-                        loading ? (
-                            <div className="flex justify-center items-center h-20">
-                                <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-indigo-600"></div>
-                            </div>
-                        ) : null
-                    }
-                    noDataComponent={<p className="py-4 text-gray-500">No se encontraron registros.</p>}
-                />
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setCurrentPage(pageNum)}
+                    className={`px-3.5 py-1.5 rounded-lg text-sm font-semibold transition-all ${
+                      currentPage === pageNum
+                        ? "bg-indigo-600 text-white shadow-sm"
+                        : "text-slate-600 hover:bg-slate-200"
+                    }`}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
             </div>
 
-            {modalOpen && selectedIdea && (
-                <IdeaModalDetails idea={selectedIdea} onClose={closeModal} />
-            )}
-        </>
-    )
-}
+            <button
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
+              disabled={currentPage === totalPages}
+              className="p-2 rounded-lg border border-slate-200 bg-white 
+							text-slate-600 hover:bg-slate-50 disabled:opacity-50 
+							disabled:cursor-not-allowed transition-all"
+            >
+              <HiChevronRight className="w-5 h-5" />
+            </button>
+          </div>
+        </div>
+      )}
 
-export default IdeaTable
+      {modalOpen && selectedIdea && (
+        <IdeaModalDetails idea={selectedIdea} onClose={closeModal} />
+      )}
+
+      <DeleteConfirmationModal
+        isOpen={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, idea: null })}
+        onConfirm={handleDelete}
+        itemName={deleteModal.idea?.fullName}
+        isLoading={isDeleting}
+      />
+    </>
+  );
+};
+
+export default IdeaTable;
