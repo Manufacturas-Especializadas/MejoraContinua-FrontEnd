@@ -7,14 +7,21 @@ import {
   HiOutlineUserAdd,
   HiChevronLeft,
   HiChevronRight,
+  HiOutlineTrash,
 } from "react-icons/hi";
+import { useDeleteIdea } from "../../hooks/useDeleteIdea";
+import { DeleteConfirmationModal } from "../DeleteConfirmationModal/DeleteConfirmationModal";
 
-const IdeaTable = ({ data = [], searchTerm = "" }) => {
+const IdeaTable = ({ data = [], searchTerm = "", onRefresh }) => {
   const [filteredText, setFilteredText] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedIdea, setSelectedIdea] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+
+  const { deleteIdea, isDeleting } = useDeleteIdea();
+  const [deleteModal, setDeleteModal] = useState({ open: false, idea: null });
+
   const itemsPerPage = 10;
 
   const navigate = useNavigate();
@@ -32,6 +39,15 @@ const IdeaTable = ({ data = [], searchTerm = "" }) => {
   const closeModal = () => {
     setModalOpen(false);
     setSelectedIdea(null);
+  };
+
+  const handleDelete = async () => {
+    const result = await deleteIdea(deleteModal.idea.id);
+
+    if (result.success) {
+      setDeleteModal({ open: false, idea: null });
+      if (onRefresh) onRefresh();
+    }
   };
 
   const filteredItems = useMemo(() => {
@@ -156,6 +172,14 @@ const IdeaTable = ({ data = [], searchTerm = "" }) => {
                     >
                       <HiOutlineUserAdd className="w-5 h-5" />
                     </button>
+                    <button
+                      title="Eliminar Idea"
+                      onClick={() => setDeleteModal({ open: true, idea: row })}
+                      className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 
+											rounded-lg transition-all"
+                    >
+                      <HiOutlineTrash className="w-5 h-5" />
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -256,6 +280,14 @@ const IdeaTable = ({ data = [], searchTerm = "" }) => {
       {modalOpen && selectedIdea && (
         <IdeaModalDetails idea={selectedIdea} onClose={closeModal} />
       )}
+
+      <DeleteConfirmationModal
+        isOpen={deleteModal.open}
+        onClose={() => setDeleteModal({ open: false, idea: null })}
+        onConfirm={handleDelete}
+        itemName={deleteModal.idea?.fullName}
+        isLoading={isDeleting}
+      />
     </>
   );
 };
