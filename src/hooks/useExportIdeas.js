@@ -16,7 +16,15 @@ export const useExportIdeas = () => {
     return `${day}${month}${year}_${hours}${minutes}`;
   };
 
-  const exportExcel = async (year = new Date().getFullYear()) => {
+  const getMonthName = (monthNumber) => {
+    if (monthNumber === 0) return "Anual";
+    const date = new Date();
+    date.setMonth(monthNumber - 1);
+    const monthStr = date.toLocaleString("es-MX", { month: "long" });
+    return monthStr.charAt(0).toUpperCase() + monthStr.slice(1);
+  };
+
+  const exportExcel = async (year = new Date().getFullYear(), month = 0) => {
     try {
       setDownloading(true);
 
@@ -27,7 +35,7 @@ export const useExportIdeas = () => {
         didOpen: () => Swal.showLoading(),
       });
 
-      const url = `${config.apiUrl}/ContinuousImprovementForm/DownloadExcel?year=${year}`;
+      const url = `${config.apiUrl}/ContinuousImprovementForm/DownloadExcel?year=${year}&month=${month}`;
 
       const response = await fetch(url, {
         method: "POST",
@@ -41,9 +49,11 @@ export const useExportIdeas = () => {
       const urlBlob = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = urlBlob;
+
+      const monthLabel = getMonthName(month);
       link.setAttribute(
         "download",
-        `IdeasMejora_${year}_${getCurrentDateTime()}.xlsx`
+        `IdeasMejora_${monthLabel}_${year}_${getCurrentDateTime()}.xlsx`,
       );
 
       document.body.appendChild(link);
